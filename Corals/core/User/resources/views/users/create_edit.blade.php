@@ -58,7 +58,7 @@
                         {!! CoralsForm::checkboxes('roles[]', 'User::attributes.user.roles' ,true,\Roles::getRolesListForLoggedInUser() ?? [],$user->roles->pluck('id')->toArray()) !!}
 
                         @if($groups =\Users::getGroupsList())
-                            {!! CoralsForm::checkboxes('groups[]', 'User::module.group.title' ,false, $groups, $user->groups->pluck('id')->toArray()) !!}
+                            {!! CoralsForm::radio('groups[]', 'User::module.group.title' ,true, $groups, $user->groups->pluck('id')->toArray()) !!}
                         @endif
 
 

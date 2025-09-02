@@ -10,6 +10,16 @@ if (!function_exists('user')) {
     }
 }
 
+if (!function_exists('user')) {
+    /**
+     * @return \Corals\User\Models\User
+     */
+    function group()
+    {
+        return \Auth::user()->group;
+    }
+}
+
 if (!function_exists('isSuperUser')) {
     function isSuperUser(\Corals\User\Models\User $user = null)
     {

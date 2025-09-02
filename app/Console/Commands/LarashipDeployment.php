@@ -55,6 +55,11 @@ class LarashipDeployment extends Command
         });
 
         $sortedModules = [
+            'corals-utility-tag',
+            'corals-utility-comment',
+            'corals-utility-seo',
+            'corals-cms',
+            'corals-payment',
         ];
 
         $this->line('Update or install required modules');
