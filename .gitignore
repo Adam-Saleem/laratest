@@ -16,3 +16,7 @@ yarn-error.log
 /public/uploads/submissions/
 .phpstorm.meta.php
 _ide_helper.php
+/.claude/
+/CLAUDE.md
+/Corals/modules/Payment/README.md
+/Corals/modules/Subscriptions/README.md

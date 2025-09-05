@@ -23,7 +23,6 @@ class UninstallModuleServiceProvider extends BaseUninstallModuleServiceProvider
         CreateTaxesTable::class,
         CreateTaxablesTable::class,
         CreateCurrencyTable::class,
-        CreateCardsTable::class,
         CreatePaymentMethodsTable::class
     ];
 

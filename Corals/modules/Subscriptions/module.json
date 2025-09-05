@@ -15,8 +15,7 @@
         "corals-foundation": "^10.0.0",
         "corals-payment": "^10.0.0",
         "corals-user": "^10.0.0",
-        "corals-settings": "^10.0.0",
-        "corals-cms": "^10.0.0"
+        "corals-settings": "^10.0.0"
     },
     "platform": "Subscription",
     "supported_platforms": [

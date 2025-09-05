@@ -2,7 +2,6 @@
 
 namespace Corals\Modules\Subscriptions;
 
-use Corals\Modules\CMS\Models\Category;
 use Corals\Modules\Payment\Common\Events\InvoicePaidEvent;
 use Corals\Modules\Subscriptions\Console\Commands\SubscriptionCheckup;
 use Corals\Modules\Subscriptions\Events\SubscriptionCreated;
@@ -135,9 +134,6 @@ class SubscriptionsServiceProvider extends BasePackageServiceProvider
 
         $billable = new Billing();
         User::mixin($billable);
-
-        $subscribable = new Subscribable();
-        \Corals\Modules\CMS\Models\Category::mixin($subscribable);
     }
 
     protected function registerCustomFieldsModels()
