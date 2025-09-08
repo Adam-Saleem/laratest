@@ -57,6 +57,7 @@ class LarashipDeployment extends Command
         $sortedModules = [
             'corals-payment',
             'corals-subscriptions',
+            'corals-medical',
         ];
 
         $this->line('Update or install required modules');

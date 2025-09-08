@@ -57,11 +57,6 @@
 
                         {!! CoralsForm::checkboxes('roles[]', 'User::attributes.user.roles' ,true,\Roles::getRolesListForLoggedInUser() ?? [],$user->roles->pluck('id')->toArray()) !!}
 
-                        @if($groups =\Users::getGroupsList())
-                            {!! CoralsForm::radio('groups[]', 'User::module.group.title' ,true, $groups, $user->groups->pluck('id')->toArray()) !!}
-                        @endif
-
-
                     </div>
                     <div class="col-md-4">
                         {!! CoralsForm::file('picture',  'User::attributes.user.picture' ) !!}

@@ -22,7 +22,7 @@
         {!! \Settings::get('custom_admin_css', '') !!}
     </style>
 </head>
-<body class="horizontal-nav skin-megna fixed-layout">
+<body class="horizontal-nav skin-default fixed-layout">
 
 <!-- ============================================================== -->
 <!-- Preloader - style you can find in spinners.css -->

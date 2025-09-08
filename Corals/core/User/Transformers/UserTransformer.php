@@ -33,7 +33,6 @@ class UserTransformer extends BaseTransformer
             'email' => $user->email,
             'status' => formatStatusAsLabels($user->status),
             'confirmed' => $user->confirmed ? '&#10004;' : '-',
-            'groups' => formatArrayAsLabels($user->groups->pluck('name'), 'warning'),
             'roles' => formatArrayAsLabels($user->roles->pluck('label'), 'success'),
             'picture' => $user->picture,
             'picture_thumb' => $canViewUser ? ('<a href="' . $show_url . '">' . $img . '</a>') : $img,

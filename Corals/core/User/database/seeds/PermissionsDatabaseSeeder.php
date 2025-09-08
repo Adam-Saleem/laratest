@@ -93,30 +93,6 @@ class PermissionsDatabaseSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
-            [
-                'name' => 'User::group.view',
-                'guard_name' => config('auth.defaults.guard'),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'name' => 'User::group.create',
-                'guard_name' => config('auth.defaults.guard'),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'name' => 'User::group.update',
-                'guard_name' => config('auth.defaults.guard'),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'name' => 'User::group.delete',
-                'guard_name' => config('auth.defaults.guard'),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
         ]);
     }
 }

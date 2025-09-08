@@ -33,7 +33,6 @@ class UsersDatabaseSeeder extends Seeder
             'password' => bcrypt('123456'),
             'job_title' => 'Administrator',
             'address' => null,
-            'confirmed_at' => Carbon::now(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
@@ -51,7 +50,6 @@ class UsersDatabaseSeeder extends Seeder
             'password' => '123456',
             'job_title' => 'Ads Coordinator',
             'address' => null,
-            'confirmed_at' => Carbon::now(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);

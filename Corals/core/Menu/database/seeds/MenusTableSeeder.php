@@ -215,17 +215,6 @@ class MenusTableSeeder extends Seeder
                     'roles' => '["1"]',
                     'order' => 0
                 ],
-                [
-                  'parent_id' => $users_menu_id,
-                  'key' => null,
-                  'url' => 'groups',
-                  'active_menu_url' => 'groups*',
-                  'name' => 'Groups',
-                  'description' => 'Groups List Menu Item',
-                  'icon' => 'fa fa-users',
-                  'target' => null, 'roles' => '["1"]',
-                  'order' => 0
-                ],
           ]
         );
     }

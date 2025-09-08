@@ -35,7 +35,7 @@ class UsersDataTable extends BaseDataTable
      */
     public function query(User $model)
     {
-        $model = $model->with('roles', 'groups')->select('users.*');
+        $model = $model->with('roles')->select('users.*');
         if (!isSuperUser()) {
             $model->whereHas('roles', function ($query) {
                 $query->whereIn('id', Roles::getRolesListForLoggedInUser()->keys());
@@ -64,7 +64,6 @@ class UsersDataTable extends BaseDataTable
             'last_name' => ['title' => trans('User::attributes.user.last_name')],
             'email' => ['title' => trans('User::attributes.user.email')],
             'status' => ['title' => trans('Corals::attributes.status')],
-            'groups' => ['title' => trans('User::module.group.title'), 'orderable' => false, 'searchable' => false],
             'roles' => [
                 'name' => 'roles.name',
                 'title' => trans('User::attributes.user.roles'),
@@ -102,13 +101,6 @@ class UsersDataTable extends BaseDataTable
                 'class' => 'col-md-2',
                 'type' => 'text',
                 'condition' => 'like',
-                'active' => true
-            ],
-            'groups.id' => [
-                'title' => trans('User::module.group.title'),
-                'class' => 'col-md-2',
-                'type' => 'select2',
-                'options' => Users::getGroupsList(),
                 'active' => true
             ],
             'roles.id' => [

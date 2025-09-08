@@ -70,7 +70,3 @@ Route::get('social-auth/{provider}/callback',
 Route::get('import/{target}/get-import-modal', 'UserImportController@getImportModal');
 Route::get('import/{target}/download-import-sample', 'UserImportController@downloadImportSample');
 Route::post('import/{target}/upload-import-file', 'UserImportController@uploadImportFile');
-
-Route::resource('groups', 'GroupsController');
-Route::post('groups/{group}/restore', 'GroupsController@restore')->withTrashed();
-Route::delete('groups/{group}/hard-delete', 'GroupsController@hardDelete')->withTrashed();

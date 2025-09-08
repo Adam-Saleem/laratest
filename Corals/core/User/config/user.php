@@ -106,9 +106,5 @@ return [
                 ],
             ],
         ],
-        'group' => [
-            'resource_url' => 'groups',
-            'presenter' => \Corals\User\Transformers\GroupPresenter::class,
-        ]
     ]
 ];

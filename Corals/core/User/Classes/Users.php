@@ -60,12 +60,4 @@ class Users
             'link' => request()->url()
         ];
     }
-
-    public function getGroupsList()
-    {
-        $groups = Group::query();
-
-        return $groups->pluck('name', 'id')->toArray();
-    }
-
 }

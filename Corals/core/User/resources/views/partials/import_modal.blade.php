@@ -20,10 +20,6 @@
 
     {!! CoralsForm::checkboxes('roles[]', 'User::attributes.user.roles' ,true,\Roles::getRolesListForLoggedInUser() ?:[],null)!!}
 
-    @if($groups = \Users::getGroupsList())
-        {!! CoralsForm::checkboxes('groups[]', 'User::module.group.title' ,false, $groups, null) !!}
-    @endif
-
     {!! CoralsForm::formButtons('User::import.labels.upload_file', [], ['show_cancel' => false]) !!}
     {!! CoralsForm::closeForm() !!}
 
