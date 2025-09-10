@@ -3,10 +3,11 @@
 namespace Corals\Modules\Medical\database\migrations;
 
 use Corals\Modules\Medical\Enums\ClinicStatuses;
-use Corals\Modules\Medical\Enums\DurationUnit;
+use Corals\Modules\Medical\Enums\FrequencyUnit;
 use Corals\Modules\Medical\Enums\GenderStatus;
 use Corals\Modules\Medical\Enums\MaritalStatus;
-use Corals\Modules\Medical\Enums\PrescriptionsTypes;
+use Corals\Modules\Medical\Enums\PaymentTypes;
+use Corals\Modules\Medical\Enums\PrescriptionTypes;
 use Corals\Modules\Medical\Enums\VisitStatuses;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -31,23 +32,7 @@ class MedicalTables extends Migration
         Schema::create('medical_villages', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('city_id')->constrained('medical_cities')->cascadeOnDelete();
-            $this->commonColumns($table);
-        });
-
-        Schema::create('medical_patients', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('national_id', 64)->nullable();
-            $table->date('date_of_birth')->nullable();
-            $table->string('phone_number', 30)->nullable();
-            $table->string('gender')->default(GenderStatus::Male->value);
-            $table->string('marital')->default(MaritalStatus::Single->value);
-            $table->string('address')->nullable();
-            $table->string('full_address')->nullable();
-            $table->foreignId('city_id')->constrained('medical_cities')->cascadeOnDelete();
-            $table->foreignId('village_id')->constrained('medical_villages')->cascadeOnDelete();
-            $table->foreignId('clinic_id')->constrained('medical_clinics')->cascadeOnDelete();
+            $table->foreignId('city_id')->constrained('medical_cities');
             $this->commonColumns($table);
         });
 
@@ -61,44 +46,51 @@ class MedicalTables extends Migration
             $table->string('logo')->nullable();
             $table->string('small_logo')->nullable();
             $table->string('status')->default(ClinicStatuses::Active->value);
+            $table->foreignId('currency_id')->constrained('currencies');
+            $this->commonColumns($table);
+        });
+
+        Schema::create('medical_patients', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('national_id', 64)->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->string('phone_number', 30)->nullable();
+            $table->string('gender')->default(GenderStatus::Male->value);
+            $table->string('marital')->default(MaritalStatus::Single->value);
+            $table->foreignId('city_id')->constrained('medical_cities');
+            $table->foreignId('village_id')->constrained('medical_villages');
+            $table->foreignId('clinic_id')->constrained('medical_clinics');
             $this->commonColumns($table);
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('clinic_id')->nullable()->after('phone_number');
-            $table->foreign('clinic_id')->references('id')->on('medical_clinics');
+            $table->foreignId('clinic_id')->nullable()->after('phone_number')
+                ->constrained('medical_clinics');
         });
 
         Schema::create('medical_allergies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('patient_id')->constrained('medical_patients')->cascadeOnDelete();
-            $table->foreignId('entered_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('patient_id')->constrained('medical_patients');
             $this->commonColumns($table);
         });
 
         Schema::create('medical_visits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained('medical_clinics')->cascadeOnDelete();
-            $table->foreignId('patient_id')->constrained('medical_patients')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('clinic_id')->constrained('medical_clinics');
+            $table->foreignId('patient_id')->constrained('medical_patients');
+            $table->foreignId('user_id')->constrained('users');
             $table->string('visit_status')->default(VisitStatuses::Waiting->value);
-            $table->foreignId('registered_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('started_at')->nullable();
-            $table->timestamp('ended_at')->nullable();
-            $this->commonColumns($table);
-        });
-
-        Schema::create('medical_scheduled_visits', function (Blueprint $table) {
-            $table->id();
             $table->timestamp('scheduled_at');
             $table->smallInteger('duration_minutes')->unsigned()->default(15);
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('ended_at')->nullable();
             $table->text('notes')->nullable();
-            $table->foreignId('visit_id')->nullable()->constrained('medical_visits')->nullOnDelete();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('clinic_id')->constrained('medical_clinics')->cascadeOnDelete();
-            $table->foreignId('patient_id')->constrained('medical_patients')->cascadeOnDelete();
-            $table->string('visit_status')->default(VisitStatuses::Waiting->value);
+            $table->decimal('discount_amount', 10, 2)->default(0);
+            $table->decimal('total_price', 10, 2)->default(0);
+            $table->decimal('total_paid', 10, 2)->default(0);
+            $table->string('payment_type')->default(PaymentTypes::Cash->value);
             $this->commonColumns($table);
         });
 
@@ -108,21 +100,16 @@ class MedicalTables extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->decimal('base_price', 10, 2)->default(0);
-            $table->foreignId('tax_class_id')->nullable()->constrained('tax_classes')->nullOnDelete();
-            $table->boolean('is_active')->default(true);
-            $table->foreignId('clinic_id')->constrained('medical_clinics')->cascadeOnDelete();
+            $table->foreignId('clinic_id')->constrained('medical_clinics');
             $this->commonColumns($table);
         });
 
-        Schema::create('medical_service_items', function (Blueprint $table) {
+        Schema::create('medical_visits_services', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('visit_id')->constrained('medical_visits')->cascadeOnDelete();
-            $table->foreignId('service_id')->constrained('medical_services')->restrictOnDelete();
+            $table->foreignId('visit_id')->constrained('medical_visits');
+            $table->foreignId('service_id')->constrained('medical_services');
             $table->unsignedInteger('quantity')->default(1);
-            $table->decimal('unit_price', 10, 2)->default(0);
-            $table->decimal('discount_amount', 10, 2)->default(0);
-            $table->decimal('total_amount', 12, 2)->default(0);
-            $table->string('currency', 3)->nullable();
+            $table->decimal('price', 10, 2)->default(0);
             $table->text('notes')->nullable();
             $this->commonColumns($table);
         });
@@ -137,32 +124,28 @@ class MedicalTables extends Migration
             $table->id();
             $table->string('name');
             $table->string('generic_name')->nullable();
-            $table->string('strength')->nullable();
-            $table->string('form')->nullable();
-            $table->string('route')->nullable();
             $this->commonColumns($table);
         });
 
         Schema::create('medical_prescriptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('visit_id')->constrained('medical_visits')->cascadeOnDelete();
-            $table->string('type')->default(PrescriptionsTypes::Normal->value);
+            $table->foreignId('visit_id')->constrained('medical_visits');
+            $table->string('type')->default(PrescriptionTypes::Normal->value);
             $this->commonColumns($table);
         });
 
         Schema::create('medical_prescription_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('prescription_id')->constrained('medical_prescriptions')->cascadeOnDelete();
-            $table->foreignId('medicine_id')->nullable()->constrained('medical_medicines')->nullOnDelete();
-            $table->foreignId('medicine_type_id')->nullable()->constrained('medical_medicine_types')->nullOnDelete();
-            $table->decimal('dosage_amount', 8, 2)->nullable();
-            $table->string('dosage_unit', 32)->nullable();
-            $table->tinyInteger('times_per_day')->unsigned()->nullable();
-            $table->smallInteger('interval_hours')->unsigned()->nullable();
-            $table->smallInteger('duration_value')->unsigned()->nullable();
-            $table->string('duration_unit')->default(DurationUnit::Days->value);
-            $table->string('route', 32)->nullable();
+            $table->foreignId('prescription_id')->constrained('medical_prescriptions');
+            $table->foreignId('medicine_id')->nullable()->constrained('medical_medicines');
+            $table->foreignId('medicine_type_id')->nullable()->constrained('medical_medicine_types');
             $table->unsignedInteger('quantity')->nullable();
+            $table->unsignedInteger('times')->nullable();
+            $table->unsignedInteger("taken_quantity");
+            $table->unsignedInteger("taken_frequency");
+            $table->string('frequency_unit')->default(FrequencyUnit::Days->value);
+            $table->unsignedInteger("duration_value");
+            $table->string('duration_unit')->default(FrequencyUnit::Days->value);
             $table->text('notes')->nullable();
             $this->commonColumns($table);
         });
@@ -176,8 +159,8 @@ class MedicalTables extends Migration
 
         Schema::create('medical_forms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained('medical_clinics')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('clinic_id')->constrained('medical_clinics');
+            $table->foreignId('user_id')->constrained('users');
             $table->string('form_title');
             $table->boolean('is_active')->default(true);
             $this->commonColumns($table);
@@ -185,7 +168,7 @@ class MedicalTables extends Migration
 
         Schema::create('medical_sections', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('form_id')->constrained('medical_forms')->cascadeOnDelete();
+            $table->foreignId('form_id')->constrained('medical_forms');
             $table->string('title');
             $table->smallInteger('order')->unsigned()->default(0);
             $table->text('description')->nullable();
@@ -194,7 +177,7 @@ class MedicalTables extends Migration
 
         Schema::create('medical_questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('section_id')->constrained('medical_sections')->cascadeOnDelete();
+            $table->foreignId('section_id')->constrained('medical_sections');
             $table->smallInteger('order')->unsigned()->default(0);
             $table->foreignId('type_id')->constrained('medical_question_types');
             $table->string('label');
@@ -205,7 +188,7 @@ class MedicalTables extends Migration
 
         Schema::create('medical_question_options', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('question_id')->constrained('medical_questions')->cascadeOnDelete();
+            $table->foreignId('question_id')->constrained('medical_questions');
             $table->string('key', 64)->nullable();
             $table->string('value');
             $table->smallInteger('order')->unsigned()->default(0);
@@ -214,7 +197,7 @@ class MedicalTables extends Migration
 
         Schema::create('medical_form_versions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('form_id')->constrained('medical_forms')->cascadeOnDelete();
+            $table->foreignId('form_id')->constrained('medical_forms');
             $table->unsignedBigInteger('version');
             $table->string('form_title');
             $table->boolean('is_published')->default(true);
@@ -224,8 +207,8 @@ class MedicalTables extends Migration
 
         Schema::create('medical_section_versions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('form_version_id')->constrained('medical_form_versions')->cascadeOnDelete();
-            $table->foreignId('section_id')->constrained('medical_sections')->cascadeOnDelete();
+            $table->foreignId('form_version_id')->constrained('medical_form_versions');
+            $table->foreignId('section_id')->constrained('medical_sections');
             $table->smallInteger('order')->unsigned()->default(0);
             $table->string('title');
             $table->text('description')->nullable();
@@ -234,8 +217,8 @@ class MedicalTables extends Migration
 
         Schema::create('medical_question_versions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('section_version_id')->constrained('medical_section_versions')->cascadeOnDelete();
-            $table->foreignId('question_id')->constrained('medical_questions')->cascadeOnDelete();
+            $table->foreignId('section_version_id')->constrained('medical_section_versions');
+            $table->foreignId('question_id')->constrained('medical_questions');
             $table->smallInteger('order')->unsigned()->default(0);
             $table->foreignId('type_id')->constrained('medical_question_types');
             $table->string('label');
@@ -246,7 +229,7 @@ class MedicalTables extends Migration
 
         Schema::create('medical_option_versions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('question_version_id')->constrained('medical_question_versions')->cascadeOnDelete();
+            $table->foreignId('question_version_id')->constrained('medical_question_versions');
             $table->string('key', 64)->nullable();
             $table->string('value');
             $table->smallInteger('order')->unsigned()->default(0);
@@ -255,12 +238,12 @@ class MedicalTables extends Migration
 
         Schema::create('medical_form_submissions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained('medical_clinics')->cascadeOnDelete();
-            $table->foreignId('form_id')->constrained('medical_forms')->cascadeOnDelete();
-            $table->foreignId('form_version_id')->nullable()->constrained('medical_form_versions')->nullOnDelete();
-            $table->foreignId('patient_id')->constrained('medical_patients')->cascadeOnDelete();
-            $table->foreignId('visit_id')->nullable()->constrained('medical_visits')->nullOnDelete();
-            $table->foreignId('submitted_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('clinic_id')->constrained('medical_clinics');
+            $table->foreignId('form_id')->constrained('medical_forms');
+            $table->foreignId('form_version_id')->nullable()->constrained('medical_form_versions');
+            $table->foreignId('patient_id')->constrained('medical_patients');
+            $table->foreignId('visit_id')->nullable()->constrained('medical_visits');
+            $table->foreignId('submitted_by')->nullable()->constrained('users');
             $table->timestamp('submitted_at')->useCurrent();
             $table->string('form_title_snapshot')->nullable();
             $this->commonColumns($table);
@@ -268,9 +251,9 @@ class MedicalTables extends Migration
 
         Schema::create('medical_form_answers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('submission_id')->constrained('medical_form_submissions')->cascadeOnDelete();
-            $table->foreignId('question_id')->constrained('medical_form_questions')->cascadeOnDelete();
-            $table->foreignId('question_version_id')->nullable()->constrained('medical_question_versions')->nullOnDelete();
+            $table->foreignId('submission_id')->constrained('medical_form_submissions');
+            $table->foreignId('question_id')->constrained('medical_questions');
+            $table->foreignId('question_version_id')->nullable()->constrained('medical_question_versions');
             $table->longText('answer_text')->nullable();
             $table->boolean('answer_boolean')->nullable();
             $table->decimal('answer_number', 12, 3)->nullable();
@@ -304,22 +287,21 @@ class MedicalTables extends Migration
         Schema::dropIfExists('medical_prescriptions');
         Schema::dropIfExists('medical_medicines');
         Schema::dropIfExists('medical_medicine_types');
-        Schema::dropIfExists('medical_service_items');
+        Schema::dropIfExists('medical_visits_services');
         Schema::dropIfExists('medical_services');
         Schema::dropIfExists('medical_scheduled_visits');
         Schema::dropIfExists('medical_visits');
         Schema::dropIfExists('medical_allergies');
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['clinic_id']);
-            $table->dropColumn('clinic_id');
+            $table->dropConstrainedForeignId('clinic_id');
         });
-        Schema::dropIfExists('medical_clinics');
         Schema::dropIfExists('medical_patients');
+        Schema::dropIfExists('medical_clinics');
         Schema::dropIfExists('medical_villages');
         Schema::dropIfExists('medical_cities');
     }
 
-    protected function commonColumns(Blueprint $table)
+    protected function commonColumns(Blueprint $table): void
     {
         $table->text('properties')->nullable();
         $table->auditable();

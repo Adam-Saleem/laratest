@@ -6,25 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-enum DurationUnit: string
+enum PaymentTypes: string
 {
-    case Hours = 'hours';
-    case Days = 'days';
-    case Weeks = 'weeks';
-    case Months = 'months';
-    case Years = 'years';
+    case Cash = 'cash';
+    case Visa = 'visa';
 
     /**
-     * Get human-readable label for the unit
+     * Get human-readable label for the status
      */
     public function label(): string
     {
         return match ($this) {
-            self::Hours => 'Hours',
-            self::Days => 'Days',
-            self::Weeks => 'Weeks',
-            self::Months => 'Months',
-            self::Years => 'Years',
+            self::Cash => 'Cash',
+            self::Visa => 'Visa / Mastercard',
         };
     }
 
@@ -38,10 +32,10 @@ enum DurationUnit: string
         return collect(self::cases())->unless(
             $skipPolicy,
             fn(Collection $statues) => $statues->filter(
-                fn(DurationUnit $unit) => user()?->can(Str::camel($unit->name), $model),
+                fn(PaymentTypes $status) => user()?->can(Str::camel($status->name), $model),
             )
-        )->mapWithKeys(fn(DurationUnit $unit) => [
-            $unit->value => $unit->label()
+        )->mapWithKeys(fn(PaymentTypes $status) => [
+            $status->value => $status->label()
         ])->toArray();
     }
 
@@ -58,16 +52,13 @@ enum DurationUnit: string
     }
 
     /**
-     * Get Bootstrap color class for the unit
+     * Get Bootstrap color class for the status
      */
     public function color(): string
     {
         return match ($this) {
-            self::Hours => 'info',
-            self::Days => 'primary',
-            self::Weeks => 'success',
-            self::Months => 'warning',
-            self::Years => 'secondary',
+            self::Cash => 'success',
+            self::Visa => 'info',
         };
     }
 }

@@ -6,19 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-enum PrescriptionsTypes: string
+enum FrequencyUnit: string
 {
-    case Normal = 'normal';
-    case Red = 'red';
+    case Hours = 'hours';
+    case Days = 'days';
+    case Weeks = 'weeks';
+    case Months = 'months';
+    case Years = 'years';
 
     /**
-     * Get human-readable label for the type
+     * Get human-readable label for the unit
      */
     public function label(): string
     {
         return match ($this) {
-            self::Normal => 'Normal',
-            self::Red => 'Red',
+            self::Hours => 'Hours',
+            self::Days => 'Days',
+            self::Weeks => 'Weeks',
+            self::Months => 'Months',
+            self::Years => 'Years',
         };
     }
 
@@ -32,10 +38,10 @@ enum PrescriptionsTypes: string
         return collect(self::cases())->unless(
             $skipPolicy,
             fn(Collection $statues) => $statues->filter(
-                fn(PrescriptionsTypes $type) => user()?->can(Str::camel($type->name), $model),
+                fn(FrequencyUnit $unit) => user()?->can(Str::camel($unit->name), $model),
             )
-        )->mapWithKeys(fn(PrescriptionsTypes $type) => [
-            $type->value => $type->label()
+        )->mapWithKeys(fn(FrequencyUnit $unit) => [
+            $unit->value => $unit->label()
         ])->toArray();
     }
 
@@ -52,13 +58,16 @@ enum PrescriptionsTypes: string
     }
 
     /**
-     * Get Bootstrap color class for the type
+     * Get Bootstrap color class for the unit
      */
     public function color(): string
     {
         return match ($this) {
-            self::Normal => 'primary',
-            self::Red => 'danger',
+            self::Hours => 'info',
+            self::Days => 'primary',
+            self::Weeks => 'success',
+            self::Months => 'warning',
+            self::Years => 'secondary',
         };
     }
 }
