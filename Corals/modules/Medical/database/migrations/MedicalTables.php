@@ -32,7 +32,8 @@ class MedicalTables extends Migration
         Schema::create('medical_villages', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('city_id')->constrained('medical_cities');
+            $table->unsignedBigInteger('city_id')->index();
+            $table->foreign('city_id')->references('id')->on('medical_cities');
             $this->commonColumns($table);
         });
 
@@ -46,7 +47,8 @@ class MedicalTables extends Migration
             $table->string('logo')->nullable();
             $table->string('small_logo')->nullable();
             $table->string('status')->default(ClinicStatuses::Active->value);
-            $table->foreignId('currency_id')->constrained('currencies');
+            $table->unsignedInteger('currency_id')->index();
+            $table->foreign('currency_id')->references('id')->on('currencies');
             $this->commonColumns($table);
         });
 
@@ -58,29 +60,36 @@ class MedicalTables extends Migration
             $table->string('phone_number', 30)->nullable();
             $table->string('gender')->default(GenderStatus::Male->value);
             $table->string('marital')->default(MaritalStatus::Single->value);
-            $table->foreignId('city_id')->constrained('medical_cities');
-            $table->foreignId('village_id')->constrained('medical_villages');
-            $table->foreignId('clinic_id')->constrained('medical_clinics');
+            $table->unsignedBigInteger('city_id')->index();
+            $table->foreign('city_id')->references('id')->on('medical_cities');
+            $table->unsignedBigInteger('village_id')->index();
+            $table->foreign('village_id')->references('id')->on('medical_villages');
+            $table->unsignedBigInteger('clinic_id')->index();
+            $table->foreign('clinic_id')->references('id')->on('medical_clinics');
             $this->commonColumns($table);
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('clinic_id')->nullable()->after('phone_number')
-                ->constrained('medical_clinics');
+            $table->unsignedBigInteger('clinic_id')->nullable()->after('phone_number')->index();
+            $table->foreign('clinic_id')->references('id')->on('medical_clinics');
         });
 
         Schema::create('medical_allergies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('patient_id')->constrained('medical_patients');
+            $table->unsignedBigInteger('patient_id')->index();
+            $table->foreign('patient_id')->references('id')->on('medical_patients');
             $this->commonColumns($table);
         });
 
         Schema::create('medical_visits', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained('medical_clinics');
-            $table->foreignId('patient_id')->constrained('medical_patients');
-            $table->foreignId('user_id')->constrained('users');
+            $table->unsignedBigInteger('clinic_id')->index();
+            $table->foreign('clinic_id')->references('id')->on('medical_clinics');
+            $table->unsignedBigInteger('patient_id')->index();
+            $table->foreign('patient_id')->references('id')->on('medical_patients');
+            $table->unsignedInteger('user_id')->index();
+            $table->foreign('user_id')->references('id')->on('users');
             $table->string('visit_status')->default(VisitStatuses::Waiting->value);
             $table->timestamp('scheduled_at');
             $table->smallInteger('duration_minutes')->unsigned()->default(15);
@@ -100,15 +109,18 @@ class MedicalTables extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->decimal('base_price', 10, 2)->default(0);
-            $table->foreignId('clinic_id')->constrained('medical_clinics');
+            $table->unsignedBigInteger('clinic_id')->index();
+            $table->foreign('clinic_id')->references('id')->on('medical_clinics');
             $this->commonColumns($table);
         });
 
         Schema::create('medical_visits_services', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('visit_id')->constrained('medical_visits');
-            $table->foreignId('service_id')->constrained('medical_services');
-            $table->unsignedInteger('quantity')->default(1);
+            $table->unsignedBigInteger('visit_id')->index();
+            $table->foreign('visit_id')->references('id')->on('medical_visits');
+            $table->unsignedBigInteger('service_id')->index();
+            $table->foreign('service_id')->references('id')->on('medical_services');
+            $table->unsignedBigInteger('quantity')->default(1);
             $table->decimal('price', 10, 2)->default(0);
             $table->text('notes')->nullable();
             $this->commonColumns($table);
@@ -129,22 +141,26 @@ class MedicalTables extends Migration
 
         Schema::create('medical_prescriptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('visit_id')->constrained('medical_visits');
+            $table->unsignedBigInteger('visit_id')->index();
+            $table->foreign('visit_id')->references('id')->on('medical_visits');
             $table->string('type')->default(PrescriptionTypes::Normal->value);
             $this->commonColumns($table);
         });
 
         Schema::create('medical_prescription_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('prescription_id')->constrained('medical_prescriptions');
-            $table->foreignId('medicine_id')->nullable()->constrained('medical_medicines');
-            $table->foreignId('medicine_type_id')->nullable()->constrained('medical_medicine_types');
-            $table->unsignedInteger('quantity')->nullable();
-            $table->unsignedInteger('times')->nullable();
-            $table->unsignedInteger("taken_quantity");
-            $table->unsignedInteger("taken_frequency");
+            $table->unsignedBigInteger('prescription_id')->index();
+            $table->foreign('prescription_id')->references('id')->on('medical_prescriptions');
+            $table->unsignedBigInteger('medicine_id')->nullable()->index();
+            $table->foreign('medicine_id')->references('id')->on('medical_medicines');
+            $table->unsignedBigInteger('medicine_type_id')->nullable()->index();
+            $table->foreign('medicine_type_id')->references('id')->on('medical_medicine_types');
+            $table->unsignedBigInteger('quantity')->nullable();
+            $table->unsignedBigInteger('times')->nullable();
+            $table->unsignedBigInteger("taken_quantity");
+            $table->unsignedBigInteger("taken_frequency");
             $table->string('frequency_unit')->default(FrequencyUnit::Days->value);
-            $table->unsignedInteger("duration_value");
+            $table->unsignedBigInteger("duration_value");
             $table->string('duration_unit')->default(FrequencyUnit::Days->value);
             $table->text('notes')->nullable();
             $this->commonColumns($table);
@@ -159,8 +175,10 @@ class MedicalTables extends Migration
 
         Schema::create('medical_forms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')->constrained('medical_clinics');
-            $table->foreignId('user_id')->constrained('users');
+            $table->unsignedBigInteger('clinic_id')->index();
+            $table->foreign('clinic_id')->references('id')->on('medical_clinics');
+            $table->unsignedInteger('user_id')->index();
+            $table->foreign('user_id')->references('id')->on('users');
             $table->string('form_title');
             $table->boolean('is_active')->default(true);
             $this->commonColumns($table);
@@ -168,18 +186,21 @@ class MedicalTables extends Migration
 
         Schema::create('medical_sections', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('form_id')->constrained('medical_forms');
+            $table->unsignedBigInteger('form_id')->index();
+            $table->foreign('form_id')->references('id')->on('medical_forms');
             $table->string('title');
-            $table->smallInteger('order')->unsigned()->default(0);
+            $table->smallInteger('order')->unsigned()->default(1);
             $table->text('description')->nullable();
             $this->commonColumns($table);
         });
 
         Schema::create('medical_questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('section_id')->constrained('medical_sections');
-            $table->smallInteger('order')->unsigned()->default(0);
-            $table->foreignId('type_id')->constrained('medical_question_types');
+            $table->unsignedBigInteger('section_id')->index();
+            $table->foreign('section_id')->references('id')->on('medical_sections');
+            $table->smallInteger('order')->unsigned()->default(1);
+            $table->unsignedBigInteger('type_id')->index();
+            $table->foreign('type_id')->references('id')->on('medical_question_types');
             $table->string('label');
             $table->boolean('is_required')->default(false);
             $table->text('help_text')->nullable();
@@ -188,82 +209,25 @@ class MedicalTables extends Migration
 
         Schema::create('medical_question_options', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('question_id')->constrained('medical_questions');
-            $table->string('key', 64)->nullable();
+            $table->unsignedBigInteger('question_id')->index();
+            $table->foreign('question_id')->references('id')->on('medical_questions');
+            $table->string('key');
             $table->string('value');
-            $table->smallInteger('order')->unsigned()->default(0);
+            $table->smallInteger('order')->unsigned()->default(1);
             $this->commonColumns($table);
         });
 
-        Schema::create('medical_form_versions', function (Blueprint $table) {
+        Schema::create('medical_answers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('form_id')->constrained('medical_forms');
-            $table->unsignedBigInteger('version');
-            $table->string('form_title');
-            $table->boolean('is_published')->default(true);
-            $table->timestamp('published_at')->nullable();
-            $this->commonColumns($table);
-        });
-
-        Schema::create('medical_section_versions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('form_version_id')->constrained('medical_form_versions');
-            $table->foreignId('section_id')->constrained('medical_sections');
-            $table->smallInteger('order')->unsigned()->default(0);
-            $table->string('title');
-            $table->text('description')->nullable();
-            $this->commonColumns($table);
-        });
-
-        Schema::create('medical_question_versions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('section_version_id')->constrained('medical_section_versions');
-            $table->foreignId('question_id')->constrained('medical_questions');
-            $table->smallInteger('order')->unsigned()->default(0);
-            $table->foreignId('type_id')->constrained('medical_question_types');
-            $table->string('label');
-            $table->boolean('is_required')->default(false);
-            $table->text('help_text')->nullable();
-            $this->commonColumns($table);
-        });
-
-        Schema::create('medical_option_versions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('question_version_id')->constrained('medical_question_versions');
-            $table->string('key', 64)->nullable();
-            $table->string('value');
-            $table->smallInteger('order')->unsigned()->default(0);
-            $this->commonColumns($table);
-        });
-
-        Schema::create('medical_form_submissions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('clinic_id')->constrained('medical_clinics');
-            $table->foreignId('form_id')->constrained('medical_forms');
-            $table->foreignId('form_version_id')->nullable()->constrained('medical_form_versions');
-            $table->foreignId('patient_id')->constrained('medical_patients');
-            $table->foreignId('visit_id')->nullable()->constrained('medical_visits');
-            $table->foreignId('submitted_by')->nullable()->constrained('users');
-            $table->timestamp('submitted_at')->useCurrent();
-            $table->string('form_title_snapshot')->nullable();
-            $this->commonColumns($table);
-        });
-
-        Schema::create('medical_form_answers', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('submission_id')->constrained('medical_form_submissions');
-            $table->foreignId('question_id')->constrained('medical_questions');
-            $table->foreignId('question_version_id')->nullable()->constrained('medical_question_versions');
+            $table->unsignedBigInteger('question_id')->index();
+            $table->foreign('question_id')->references('id')->on('medical_questions');
+            $table->unsignedBigInteger('visit_id')->index();
+            $table->foreign('visit_id')->references('id')->on('medical_visits');
             $table->longText('answer_text')->nullable();
-            $table->boolean('answer_boolean')->nullable();
-            $table->decimal('answer_number', 12, 3)->nullable();
-            $table->date('answer_date')->nullable();
-            $table->json('answer_json')->nullable();
-            $table->string('file_path')->nullable();
-            $table->string('question_label_snapshot')->nullable();
-            $table->json('options_snapshot')->nullable();
+            $table->json('answer_key')->nullable(); //array of keys for radio, checkbox, select
             $this->commonColumns($table);
         });
+
     }
     /**
      * Reverse the migrations.
@@ -272,12 +236,7 @@ class MedicalTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('medical_form_answers');
-        Schema::dropIfExists('medical_form_submissions');
-        Schema::dropIfExists('medical_option_versions');
-        Schema::dropIfExists('medical_question_versions');
-        Schema::dropIfExists('medical_section_versions');
-        Schema::dropIfExists('medical_form_versions');
+        Schema::dropIfExists('medical_answers');
         Schema::dropIfExists('medical_question_options');
         Schema::dropIfExists('medical_questions');
         Schema::dropIfExists('medical_sections');
@@ -289,11 +248,13 @@ class MedicalTables extends Migration
         Schema::dropIfExists('medical_medicine_types');
         Schema::dropIfExists('medical_visits_services');
         Schema::dropIfExists('medical_services');
-        Schema::dropIfExists('medical_scheduled_visits');
         Schema::dropIfExists('medical_visits');
         Schema::dropIfExists('medical_allergies');
         Schema::table('users', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('clinic_id');
+            if (Schema::hasColumn('users', 'clinic_id')) {
+                $table->dropForeign(['clinic_id']);
+                $table->dropColumn('clinic_id');
+            }
         });
         Schema::dropIfExists('medical_patients');
         Schema::dropIfExists('medical_clinics');
